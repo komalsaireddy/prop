@@ -1,274 +1,178 @@
+<div align="center">
 
+# 🛩️ Governed Drone Behavior Language (GDBL)
 
-🛩️ Governed Drone Behavior Language (GDBL)
+**A safety-first, policy-governed autonomy platform for drones.**
+*Where AI suggests, rules decide, and safety always overrides.*
 
-A safety-first, policy-governed autonomy platform for drones
-Where AI suggests, rules decide, and safety always overrides.
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20WSL2-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://learn.microsoft.com/en-us/windows/wsl/install)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-⸻
+[Getting Started](#-getting-started) • [Documentation](#-documentation) • [Architecture](#-system-architecture) • [Contribute](#-contributing)
 
-🚀 Overview
+</div>
 
-GDBL (Governed Drone Behavior Language) is a rule-based autonomy framework that allows drone behavior to be defined using a human-readable DSL, while enforcing non-bypassable safety constraints inspired by aviation regulations (DGCA/FAA-style).
+---
 
-Unlike traditional drone AI systems that directly control actuators, GDBL enforces a governed execution pipeline:
+## 🚀 Overview
 
-Intent → Safety → Authorization → Action
+**GDBL (Governed Drone Behavior Language)** is a revolutionary rule-based autonomy framework. It allows drone behavior to be defined using a human-readable Domain Specific Language (DSL), while strictly enforcing non-bypassable safety constraints inspired by aviation regulations (DGCA/FAA).
 
-AI never controls the drone directly — it only provides signals.
+Unlike traditional AI systems, GDBL strictly separates **Intent** from **Action**:
 
-⸻
+> `Intent` → `Safety Check` → `Authorization` → `Action`
 
-🎯 Why GDBL?
+**AI never controls the drone directly.** It only provides signals. The Safety Kernel has the final say.
 
-Modern drone systems suffer from:
-	•	Unsafe AI overrides
-	•	Hard-coded behavior logic
-	•	No explainability
-	•	No regulatory alignment
+## 🎯 Key Features
 
-GDBL solves this by introducing:
-	•	A Behavior DSL
-	•	A Safety Kernel (final authority)
-	•	Explainable decisions
-	•	Simulation + Real-Hardware compatibility
+| Feature | Description |
+| :--- | :--- |
+| **🛡️ Non-Bypassable Safety** | The Safety Kernel is the final authority. It overrides unsafe intents from AI or Users. |
+| **✍️ Human-Readable DSL** | Define behavior rules in plain English-like syntax (`RULE`, `WHEN`, `IF`, `DO`). |
+| **🧠 Explainable AI** | Every decision is logged with a clear reason. No "black box" behavior. |
+| **🎮 Sim & Real Hardware** | Seamlessly switch between PX4 SITL simulation and real hardware execution. |
+| **⚡ Regulatory Alignment** | Designed to comply with DGCA, FAA, and EASA safety principles. |
 
-⸻
+---
 
-🧠 Core Philosophy
+## 🏗️ System Architecture
 
-AI can recommend.
-Rules can allow.
-Safety can override.
+```mermaid
+graph TD
+    User[User / AI] -->|Intent| Parser[DSL Parser]
+    Parser -->|Abstract Intent| Safety[🛡️ Safety Kernel]
+    Safety -->|Authorized Command| Adapter[Command Adapter]
+    Adapter -->|MAVLink| Drone[🚁 PX4 Drone / Simulator]
+    
+    subgraph "Governance Boundary"
+    Safety
+    end
+```
 
-⸻
+---
 
-🧩 System Architecture
+## 🛠️ Getting Started
 
-┌────────────┐
-│   GUI / UX │  ← Editor, Logs, Visualizer
-└─────┬──────┘
-      │
-┌─────▼──────┐
-│  DSL Parser│  ← RULE / WHEN / IF / DO
-└─────┬──────┘
-      │
-┌─────▼──────┐
-│ Intent IR  │  ← Abstract intent (no hardware access)
-└─────┬──────┘
-      │
-┌─────▼──────┐
-│ Safety     │  ← FINAL AUTHORITY (cannot be bypassed)
-│ Kernel     │
-└─────┬──────┘
-      │
-┌─────▼──────┐
-│ Command    │  ← PX4 / MAVLink Adapter
-│ Adapter    │
-└─────┬──────┘
-      │
-┌─────▼──────┐
-│ PX4 / HW   │  ← Real drone OR simulator
-└────────────┘
+### Prerequisites
 
+*   **OS**: Windows 10/11 with **WSL 2** enabled.
+*   **Python**: Version 3.10 or higher.
+*   **Permissions**: Administrator access for initial setup.
 
-⸻
+### 📥 Installation
 
-✍️ Behavior Language (DSL)
+1.  **Clone the Repository**
+    ```bash
+    git clone <repository_url>
+    cd prop
+    ```
 
-Basic Syntax
+2.  **Run the One-Click Installer**
+    This script sets up WSL and downloads the PX4 Autopilot firmware automatically.
+    ```bash
+    python backend_installer.py
+    ```
+    > **Note**: A system restart may be required if WSL is installed for the first time.
 
+### ▶️ Usage
+
+**Start the Platform**
+Run the unified launcher to start the GUI, backend services, and simulation environment.
+
+```bash
+python launcher.py
+```
+
+*The launcher handles the PX4 SITL (Software In The Loop) simulation automatically.*
+
+---
+
+## ✍️ Behavior Language (DSL)
+
+GDBL uses a simple, declarative syntax for defining rules.
+
+### Syntax Structure
+
+```gdbl
 RULE <name>
 WHEN <event>
 IF <condition>
 DO <action>
+```
 
-Example
+### Examples
 
-RULE avoid_risk
-WHEN anomaly_detected
-IF confidence > 0.7
-DO RETURN_HOME
-
-
-⸻
-
-📚 Example Rules
-
-🔋 Battery Safety
-
+#### 🔋 Battery Safety
+```gdbl
 RULE battery_emergency
 WHEN battery_low
 IF level < 20
 DO RETURN_HOME
+```
 
-📡 GPS Failure
-
-RULE gps_fail_safe
-WHEN gps_lost
-IF duration > 5
-DO HOVER
-
-🗺️ DGCA-style Geofencing
-
-RULE no_fly_zone
-WHEN geofence_violation
-IF distance > 0
-DO RETURN_HOME
-
-🚧 Obstacle Avoidance
-
+#### 🚧 Obstacle Avoidance
+```gdbl
 RULE obstacle_detect
 WHEN obstacle_detected
 IF distance < 2
 DO STOP
+```
 
+---
 
-⸻
+## 🛡️ The Safety Kernel
 
-🛡️ Safety Kernel (Non-Bypassable)
+The **Safety Kernel** is the heart of GDBL. It operates on a simple principle: **Safety > Mission**.
 
-The Safety Kernel is the final authority.
+*   **Scenario**: User requests `HOVER`, AI suggests `PROCEED`, but Battery is critical.
+*   **Outcome**: Kernel overrides with `RETURN_HOME`.
 
-Even if:
-	•	The user requests HOVER
-	•	AI suggests PROCEED
-	•	Rules allow movement
+**Decision Log Example:**
+```yaml
+INTENT:   HOVER
+DECISION: OVERRIDE ❌
+ACTION:   RETURN_HOME 🏠
+REASON:   Battery unsafe (< 20%)
+```
 
-The kernel will override if safety is violated.
+---
 
-Example override log:
+## 📂 Project Structure
 
-INTENT: HOVER
-DECISION: OVERRIDE
-ACTION: RETURN_HOME
-REASON: Battery unsafe
+```bash
+prop/
+├── gui/                # Frontend GUI & Visualizer
+├── dsl/                # DSL Parser & Interpreter
+├── intent/             # Intent Generation Logic
+├── safety/             # Safety Kernel (The Guardrails)
+├── adapter/            # PX4 / MAVLink Communication
+├── simulator/          # Context Simulator
+├── logs/               # Decision & Flight Logs
+├── backend_installer.py # Setup Script
+└── launcher.py         # Main Entry Point
+```
 
-✔ Fully explainable
-✔ Logged permanently
-✔ Cannot be disabled
+---
 
-⸻
+## 🗺️ Roadmap
 
-🖥️ GUI Features
-	•	🧠 DSL editor with syntax highlighting
-	•	🛩️ Real-time hardware connection status
-	•	📜 Decision logs with reasoning
-	•	🚨 Safety override visibility
-	•	🎮 Simulator mode (practice without hardware)
-	•	🔌 Real PX4 hardware mode (no fake data)
+- [ ] 📡 **Real-time Telemetry Mapping**
+- [ ] 🎥 **Visual 3D Mission Playback**
+- [ ] 📜 **DGCA-Compliant Rule Templates**
+- [ ] 🤖 **Multi-Drone Coordination**
+- [ ] 🌉 **ROS2 Bridge Integration**
 
-⸻
+---
 
-🎮 Simulation vs Real Drone
+<div align="center">
 
-Mode	Purpose
-Simulator	Practice, demos, rule testing
-Real Hardware	Actual PX4 drone control
-Safety Kernel	Active in both modes
+### 🧑‍💻 Author
 
-⚠️ Simulator ≠ fake behavior
-Only sensor data changes — safety logic stays identical.
+**Komal Sai Reddy Kotha**
+*Governed Autonomy | Drone Safety Systems | AI + Regulation*
 
-⸻
+*"Can drones be autonomous without being unsafe? GDBL says yes."*
 
-🔌 Hardware Support
-	•	PX4 Autopilot
-	•	MAVLink (UDP / Serial)
-	•	USB / Telemetry radio
-	•	SITL (for testing)
-
-⸻
-
-🧠 AI Integration (Current + Future)
-
-Current
-	•	AI generates signals only
-	•	Example:
-
-{ "event": "anomaly_detected", "confidence": 0.89 }
-
-Future (Planned)
-	•	Vision-based obstacle detection
-	•	Predictive battery models
-	•	Weather-aware risk scoring
-	•	Multi-agent coordination
-
-⚠️ AI will never bypass the Safety Kernel
-
-⸻
-
-📁 Project Structure
-
-MVP/
-├── gui/                # GUI + Visualizer
-├── dsl/                # Language parser
-├── intent/             # Intent generation
-├── safety/             # Safety kernel
-├── adapter/            # PX4 / MAVLink adapter
-├── simulator/          # Context simulator
-├── logs/               # Decision logs
-├── backend_installer.py
-└── README.md
-
-
-⸻
-
-🧪 Why Decisions Look “The Same” Sometimes
-
-If all rules result in:
-
-ACTION: RETURN_HOME
-REASON: Battery unsafe
-
-That means:
-	•	The simulator context reports unsafe battery
-	•	Safety Kernel overrides every intent
-	•	This is expected and correct behavior
-
-Safety is working ✔
-
-⸻
-
-🏛️ Regulatory Alignment
-
-GDBL is designed to align with:
-	•	DGCA India
-	•	FAA
-	•	EASA principles
-
-Features:
-	•	Geofencing
-	•	Explainable decisions
-	•	Human-auditable logs
-	•	Non-AI safety enforcement
-
-⸻
-
-🚧 Roadmap
-	•	Full real-time telemetry mapping
-	•	Visual 3D mission playback
-	•	DGCA-compliant rule templates
-	•	Mission replay & audit export
-	•	Multi-drone coordination
-	•	ROS2 bridge
-
-⸻
-
-🧑‍💻 Author
-
-Komal Sai Reddy Kotha
-
-Governed Autonomy | Drone Safety Systems | AI + Regulation
-
-⸻
-
-⭐ Final Note
-
-This project is not a simulator demo.
-It is a governed autonomy framework designed to answer one question:
-
-“Can drones be autonomous without being unsafe?”
-
-GDBL says yes.
-
+</div>
