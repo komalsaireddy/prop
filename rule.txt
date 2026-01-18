@@ -1,0 +1,4 @@
+RULE avoid_risk
+WHEN anomaly_detected
+IF confidence > 0.7
+DO HOVER
